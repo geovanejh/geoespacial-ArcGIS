@@ -1,4 +1,3 @@
-// /contexts/MapContext.tsx
 import { createContext, useContext, useReducer, ReactNode } from "react";
 import MapView from "@arcgis/core/views/MapView";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";

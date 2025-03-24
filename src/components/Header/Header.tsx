@@ -1,4 +1,3 @@
-// /components/Header/Header.tsx
 import { Logo } from "./Logo/Logo";
 import { HeaderContainer, IconWrapper } from "./styles";
 import { LuFilter } from "react-icons/lu";

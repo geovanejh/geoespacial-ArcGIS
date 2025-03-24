@@ -1,4 +1,3 @@
-// /components/Modal/SearchModal.tsx
 import {
   CloseButton,
   ModalContent,

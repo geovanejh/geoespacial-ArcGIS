@@ -1,4 +1,3 @@
-// /components/Map/MapComponent.tsx
 import React, { useEffect, useRef } from "react";
 import MapView from "@arcgis/core/views/MapView";
 import WebMap from "@arcgis/core/WebMap";
@@ -117,7 +116,7 @@ export const MapComponent: React.FC = () => {
         viewRef.current = null;
       }
     };
-  }, [dispatch]); // Dependência apenas no dispatch
+  }, [dispatch]);
 
   return (
     <MapContainer>
