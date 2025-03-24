@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import MapView from "@arcgis/core/views/MapView";
 import WebMap from "@arcgis/core/WebMap";
 import esriConfig from "@arcgis/core/config";
@@ -6,17 +6,31 @@ import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import LayerList from "@arcgis/core/widgets/LayerList";
 import Expand from "@arcgis/core/widgets/Expand";
 import Legend from "@arcgis/core/widgets/Legend";
-import Graphic from "@arcgis/core/Graphic";
-import Polygon from "@arcgis/core/geometry/Polygon";
-import Point from "@arcgis/core/geometry/Point"; // Added for explicit typing
 import { MapContainer } from "./styles";
 
-export const MapComponent: React.FC = () => {
+interface BairroAttributes {
+  objectid: number;
+  bairro: string;
+  [key: string]: any;
+}
+
+interface MapComponentProps {
+  setViewRef: (view: MapView) => void;
+  setBairrosLayerRef: (layer: FeatureLayer) => void;
+  selectedBairro: BairroAttributes | null;
+  setSelectedBairro: React.Dispatch<
+    React.SetStateAction<BairroAttributes | null>
+  >;
+}
+
+export const MapComponent: React.FC<MapComponentProps> = ({
+  setViewRef,
+  setBairrosLayerRef,
+  selectedBairro,
+  setSelectedBairro,
+}) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<MapView | null>(null);
-  const [selectedBairro, setSelectedBairro] = useState<any>(null);
-  const [inputValue, setInputValue] = useState<string>("");
-  const bairrosLayerRef = useRef<FeatureLayer | null>(null);
 
   useEffect(() => {
     esriConfig.apiKey =
@@ -34,7 +48,7 @@ export const MapComponent: React.FC = () => {
       },
     });
 
-    bairrosLayerRef.current = bairrosLayer;
+    setBairrosLayerRef(bairrosLayer);
 
     const eixosLayer = new FeatureLayer({
       url: "https://arcgis-ope.codexremote.com.br/server/rest/services/Hosted/Camadas_Teste/FeatureServer/2",
@@ -68,9 +82,12 @@ export const MapComponent: React.FC = () => {
       zoom: 12,
     });
 
+    viewRef.current = view;
+    setViewRef(view);
+
     view
       .when(() => {
-        viewRef.current = view;
+        console.log("MapView initialized");
       })
       .catch((error) => {
         console.error("Error initializing MapView:", error);
@@ -84,9 +101,9 @@ export const MapComponent: React.FC = () => {
         )?.graphic;
 
         if (bairroGraphic) {
-          setSelectedBairro(bairroGraphic.attributes);
+          setSelectedBairro(bairroGraphic.attributes); // Atualiza o estado no Home
         } else {
-          setSelectedBairro(null);
+          setSelectedBairro(null); // Limpa a seleção se nenhum bairro for clicado
         }
       });
     });
@@ -122,88 +139,31 @@ export const MapComponent: React.FC = () => {
     return () => {
       if (viewRef.current) {
         viewRef.current.destroy();
+        viewRef.current = null;
       }
     };
   }, []);
 
-  const buscaBairro = async (): Promise<void> => {
-    if (!inputValue || !viewRef.current || !bairrosLayerRef.current) {
-      return;
-    }
-
-    try {
-      const query = bairrosLayerRef.current.createQuery();
-      query.where = `bairro = '${inputValue.toUpperCase()}'`;
-      query.outFields = ["*"];
-      query.returnGeometry = true;
-
-      const result = await bairrosLayerRef.current.queryFeatures(query);
-
-      if (result.features.length > 0) {
-        const feature = result.features[0];
-        setSelectedBairro(feature.attributes);
-
-        if (viewRef.current && feature.geometry) {
-          await viewRef.current.goTo({
-            target: feature.geometry,
-            zoom: 15,
-          });
-
-          const graphic = new Graphic({
-            geometry: feature.geometry,
-            attributes: feature.attributes,
-            layer: bairrosLayerRef.current,
-          });
-
-          const centroid = (feature.geometry as Polygon).centroid;
-          viewRef.current.openPopup({
-            features: [graphic],
-            location: centroid as Point,
-          });
-        }
-      } else {
-        setSelectedBairro(null);
-        alert(`Bairro "${inputValue}" não encontrado`);
-      }
-    } catch (error) {
-      console.error("Error querying bairro:", error);
-      setSelectedBairro(null);
-      alert("Erro ao buscar o bairro");
-    }
-  };
-
   return (
-    <>
-      <MapContainer>
-        <div
-          ref={mapRef}
-          style={{
-            width: "100%",
-            height: "94vh",
-          }}
-        />
-
-        {selectedBairro && (
-          <div>
-            <h3>Dados do bairro</h3>
-            <p>
-              <b>Id:</b> {selectedBairro.objectid}
-            </p>
-            <p>
-              <b>Nome:</b> {selectedBairro.bairro}
-            </p>
-          </div>
-        )}
-      </MapContainer>
-      <div>
-        <input
-          type="text"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          placeholder="Digite o nome do bairro"
-        />
-        <button onClick={buscaBairro}>click</button>
-      </div>
-    </>
+    <MapContainer>
+      <div
+        ref={mapRef}
+        style={{
+          width: "100%",
+          height: "94vh",
+        }}
+      />
+      {selectedBairro && (
+        <div>
+          <h3>Dados do bairro</h3>
+          <p>
+            <b>Id:</b> {selectedBairro.objectid}
+          </p>
+          <p>
+            <b>Nome:</b> {selectedBairro.bairro}
+          </p>
+        </div>
+      )}
+    </MapContainer>
   );
 };

@@ -1,4 +1,3 @@
-// components/Header/Header.jsx
 import { Logo } from "./Logo/Logo";
 import { HeaderContainer, IconWrapper } from "./styles";
 import { LuFilter } from "react-icons/lu";
@@ -7,7 +6,17 @@ import Codex_Logo from "../../assets/Codex_Logo.svg";
 import { SearchModal } from "../Modal/SearchModal";
 import { useState } from "react";
 
-export const Header = () => {
+interface HeaderProps {
+  search: string;
+  setSearch: React.Dispatch<React.SetStateAction<string>>;
+  buscaBairro: () => Promise<void>;
+}
+
+export const Header: React.FC<HeaderProps> = ({
+  search,
+  setSearch,
+  buscaBairro,
+}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
@@ -20,7 +29,13 @@ export const Header = () => {
           <IoMdMenu />
         </IconWrapper>
       </HeaderContainer>
-      <SearchModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <SearchModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        search={search}
+        setSearch={setSearch}
+        buscaBairro={buscaBairro}
+      />
     </>
   );
 };

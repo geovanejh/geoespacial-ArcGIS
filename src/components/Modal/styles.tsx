@@ -26,6 +26,7 @@ export const ModalTitle = styled.h2`
   margin: 0;
   font-size: 18px;
   margin-bottom: 16px;
+  font-weight: 900;
 `;
 
 export const CloseButton = styled.button`
