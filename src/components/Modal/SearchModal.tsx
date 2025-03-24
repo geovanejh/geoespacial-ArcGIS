@@ -1,3 +1,4 @@
+// /components/Modal/SearchModal.tsx
 import {
   CloseButton,
   ModalContent,
@@ -6,22 +7,21 @@ import {
   SearchButton,
   SearchInput,
 } from "./styles";
+import { useMap } from "../../contexts/MapContext";
 
 interface SearchModalProps {
   isOpen: boolean;
   onClose: () => void;
-  search: string;
-  setSearch: React.Dispatch<React.SetStateAction<string>>;
   buscaBairro: () => Promise<void>;
 }
 
 export const SearchModal = ({
   isOpen,
   onClose,
-  search,
-  setSearch,
   buscaBairro,
 }: SearchModalProps) => {
+  const { state, dispatch } = useMap();
+
   if (!isOpen) return null;
 
   const handleSearch = () => {
@@ -38,8 +38,10 @@ export const SearchModal = ({
         <SearchInput
           placeholder="Nome do Bairro"
           type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          value={state.search}
+          onChange={(e) =>
+            dispatch({ type: "SET_SEARCH", payload: e.target.value })
+          }
         />
         <SearchButton onClick={handleSearch}>Buscar</SearchButton>
       </ModalContent>

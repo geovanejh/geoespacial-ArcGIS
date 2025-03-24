@@ -1,5 +1,5 @@
 import { JSX } from "react/jsx-runtime";
-import { Home } from "../../pages/Home/Home";
+import { Home } from "../../pages/Home";
 
 export interface AppRoute {
   path: string;

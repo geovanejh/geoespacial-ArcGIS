@@ -1,3 +1,4 @@
+// /components/Map/MapComponent.tsx
 import React, { useEffect, useRef } from "react";
 import MapView from "@arcgis/core/views/MapView";
 import WebMap from "@arcgis/core/WebMap";
@@ -6,31 +7,14 @@ import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import LayerList from "@arcgis/core/widgets/LayerList";
 import Expand from "@arcgis/core/widgets/Expand";
 import Legend from "@arcgis/core/widgets/Legend";
+import Graphic from "@arcgis/core/Graphic";
 import { MapContainer } from "./styles";
+import { useMap } from "../../contexts/MapContext";
 
-interface BairroAttributes {
-  objectid: number;
-  bairro: string;
-  [key: string]: any;
-}
-
-interface MapComponentProps {
-  setViewRef: (view: MapView) => void;
-  setBairrosLayerRef: (layer: FeatureLayer) => void;
-  selectedBairro: BairroAttributes | null;
-  setSelectedBairro: React.Dispatch<
-    React.SetStateAction<BairroAttributes | null>
-  >;
-}
-
-export const MapComponent: React.FC<MapComponentProps> = ({
-  setViewRef,
-  setBairrosLayerRef,
-  selectedBairro,
-  setSelectedBairro,
-}) => {
+export const MapComponent: React.FC = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<MapView | null>(null);
+  const { state, dispatch } = useMap();
 
   useEffect(() => {
     esriConfig.apiKey =
@@ -48,7 +32,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
       },
     });
 
-    setBairrosLayerRef(bairrosLayer);
+    dispatch({ type: "SET_BAIRROS_LAYER_REF", payload: bairrosLayer });
 
     const eixosLayer = new FeatureLayer({
       url: "https://arcgis-ope.codexremote.com.br/server/rest/services/Hosted/Camadas_Teste/FeatureServer/2",
@@ -83,28 +67,19 @@ export const MapComponent: React.FC<MapComponentProps> = ({
     });
 
     viewRef.current = view;
-    setViewRef(view);
+    dispatch({ type: "SET_VIEW_REF", payload: view });
 
-    view
-      .when(() => {
-        console.log("MapView initialized");
-      })
-      .catch((error) => {
-        console.error("Error initializing MapView:", error);
-      });
-
-    view.on("click", (event: any) => {
-      view.hitTest(event).then((response: any) => {
-        const bairroGraphic = response.results.find(
-          (result: any) =>
-            result.graphic && result.graphic.layer === bairrosLayer
+    view.on("click", (event) => {
+      view.hitTest(event).then((response) => {
+        const results = response.results as Array<{ graphic?: Graphic }>;
+        const bairroGraphic = results.find(
+          (result) => result.graphic && result.graphic.layer === bairrosLayer
         )?.graphic;
 
-        if (bairroGraphic) {
-          setSelectedBairro(bairroGraphic.attributes); // Atualiza o estado no Home
-        } else {
-          setSelectedBairro(null); // Limpa a seleção se nenhum bairro for clicado
-        }
+        dispatch({
+          type: "SET_SELECTED_BAIRRO",
+          payload: bairroGraphic ? bairroGraphic.attributes : null,
+        });
       });
     });
 
@@ -142,7 +117,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
         viewRef.current = null;
       }
     };
-  }, []);
+  }, [dispatch]); // Dependência apenas no dispatch
 
   return (
     <MapContainer>
@@ -153,14 +128,14 @@ export const MapComponent: React.FC<MapComponentProps> = ({
           height: "94vh",
         }}
       />
-      {selectedBairro && (
+      {state.selectedBairro && (
         <div>
           <h3>Dados do bairro</h3>
           <p>
-            <b>Id:</b> {selectedBairro.objectid}
+            <b>Id:</b> {state.selectedBairro.objectid}
           </p>
           <p>
-            <b>Nome:</b> {selectedBairro.bairro}
+            <b>Nome:</b> {state.selectedBairro.bairro}
           </p>
         </div>
       )}
