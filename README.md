@@ -1,54 +1,65 @@
-# React + TypeScript + Vite
+# Plataforma Geoespacial com ArcGIS
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Este projeto apresenta um mapa interativo da cidade de Porto Alegre, permitindo a visualização de diferentes camadas de dados geoespaciais, como:
 
-Currently, two official plugins are available:
+- **Bairros**: Delimitações e informações detalhadas sobre cada bairro.
+- **Regiões de Planejamento**: Áreas organizadas para planejamento urbano.
+- **Eixos**: Estruturas lineares representando vias principais ou corredores de transporte.
+- **Pontos Cotados**: Localizações específicas com informações relevantes.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+A aplicação foi projetada para facilitar a análise e o planejamento urbano, oferecendo uma interface intuitiva e personalizável.
 
-## Expanding the ESLint configuration
+## Funcionalidades
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Mapeamento Interativo**: Criação de mapas dinâmicos e interativos.
+- **Busca por Bairros**: Localize bairros específicos utilizando ferramentas de busca avançada.
+- **Visualização por Camadas**: Ative ou desative camadas de dados para personalizar a visualização do mapa.
+- **Exibição de Detalhes de Bairros**: Acesse informações detalhadas sobre bairros ao interagir com o mapa.
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+## Requisitos
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- **ArcGIS Pro** ou **ArcGIS Online**.
+- [Node.js](https://nodejs.org/) (versão 14.x ou superior)
+- [npm](https://www.npmjs.com/) ou [yarn](https://yarnpkg.com/)
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Instalação
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/seu-usuario/Plataforma-Geoespacial-com-ArcGIS.git
+   ```
+2. Instale as dependências:
+   ```bash
+   npm install
+   ```
+3. Configure as variáveis de ambiente (.env):
+   ```bash
+   ARCGIS_API_KEY="SUA_API_KEY_AQUI"
+    ```
+
+  ## Tecnologias Utilizadas
+
+  Este projeto foi desenvolvido utilizando as seguintes tecnologias:
+
+  - **React**: Biblioteca JavaScript para construção de interfaces de usuário.
+  - **Vite**: Ferramenta de build rápida e moderna para projetos web.
+  - **TypeScript**: Superset do JavaScript que adiciona tipagem estática.
+  - **Styled Components**: Biblioteca para estilização de componentes React.
+  - **ArcGIS API for JavaScript**: API para criação de aplicações geoespaciais.
+
+  ## Estrutura do Projeto
+
+  ```
+  Plataforma-Geoespacial-com-ArcGIS/
+  ├── public/                # Arquivos estáticos
+  ├── src/                   # Código-fonte do projeto
+  │   ├── assets/            # Recursos como imagens e estilos globais
+  │   ├── components/        # Componentes reutilizáveis
+  │   ├── pages/             # Páginas principais da aplicação
+  │   ├── router/            # Definições de rotas da aplicação
+  │   └── main.tsx           # Ponto de entrada do React
+  ├── .env                   # Variáveis de ambiente
+  ├── package.json           # Configurações e dependências do projeto
+  ├── tsconfig.json          # Configurações do TypeScript
+  └── vite.config.ts         # Configurações do Vite
+  ```
