@@ -25,7 +25,6 @@ export const SearchModal = ({
   if (!isOpen) return null;
 
   const handleSearch = () => {
-    console.log("executou");
     buscaBairro();
     onClose();
   };

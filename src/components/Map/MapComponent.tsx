@@ -11,16 +11,13 @@ import { MapContainer } from "./styles";
 interface BairroAttributes {
   objectid: number;
   bairro: string;
-  [key: string]: any;
 }
 
 interface MapComponentProps {
   setViewRef: (view: MapView) => void;
   setBairrosLayerRef: (layer: FeatureLayer) => void;
   selectedBairro: BairroAttributes | null;
-  setSelectedBairro: React.Dispatch<
-    React.SetStateAction<BairroAttributes | null>
-  >;
+  setSelectedBairro: (bairro: BairroAttributes | null) => void;
 }
 
 export const MapComponent: React.FC<MapComponentProps> = ({
@@ -33,43 +30,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
   const viewRef = useRef<MapView | null>(null);
 
   useEffect(() => {
-    esriConfig.apiKey =
-      "AAPTxy8BH1VEsoebNVZXo8HurJY6VTF_viJ_iSXfeA36yKs-wnwh0SspUSqO5cm_eFL_SudFI8S4xt68rdy3RVQdeB4KIgvbjntS6eglP8oOxzAr9jrrvP2decAY4v6GPot2Iw9TG_yvjQlUd7_xVqUVT1e-_5lFe4KdcZRsBdqxsjJLEuhlrYXgvwt869obxTGkg07NFKR3S6BaPNOnsgHuaWBRcguWKu-P1HoDHgaSJng.AT1_SHz0yMCF";
-
-    const bairrosLayer = new FeatureLayer({
-      url: "https://arcgis-ope.codexremote.com.br/server/rest/services/Hosted/Camadas_Teste/FeatureServer/4",
-      title: "Bairros",
-      opacity: 0.8,
-      visible: true,
-      outFields: ["bairro"],
-      popupTemplate: {
-        title: "Bairro: {bairro}",
-        outFields: ["bairro"],
-      },
-    });
-
-    setBairrosLayerRef(bairrosLayer);
-
-    const eixosLayer = new FeatureLayer({
-      url: "https://arcgis-ope.codexremote.com.br/server/rest/services/Hosted/Camadas_Teste/FeatureServer/2",
-      title: "Eixos",
-      opacity: 0.6,
-      visible: true,
-    });
-
-    const regioesPlanejamentoLayer = new FeatureLayer({
-      url: "https://arcgis-ope.codexremote.com.br/server/rest/services/Hosted/Camadas_Teste/FeatureServer/3",
-      title: "Regiões de Planejamento",
-      opacity: 0.5,
-      visible: true,
-    });
-
-    const pontosCotadosLayer = new FeatureLayer({
-      url: "https://arcgis-ope.codexremote.com.br/server/rest/services/Hosted/Camadas_Teste/FeatureServer/1",
-      title: "Pontos Cotados",
-      opacity: 0.7,
-      visible: true,
-    });
+    esriConfig.apiKey = import.meta.env.VITE_ARCGIS_API_KEY;
 
     const webMap = new WebMap({
       basemap: "topo-vector",
@@ -82,30 +43,37 @@ export const MapComponent: React.FC<MapComponentProps> = ({
       zoom: 12,
     });
 
-    viewRef.current = view;
-    setViewRef(view);
+    const bairrosLayer = new FeatureLayer({
+      url: "https://arcgis-ope.codexremote.com.br/server/rest/services/Hosted/Camadas_Teste/FeatureServer/4",
+      title: "Bairros",
+      opacity: 1,
+      visible: true,
+      outFields: ["bairro"],
+      popupTemplate: {
+        title: "Bairro: {bairro}",
+        outFields: ["bairro"],
+      },
+    });
 
-    view
-      .when(() => {
-        console.log("MapView initialized");
-      })
-      .catch((error) => {
-        console.error("Error initializing MapView:", error);
-      });
+    const eixosLayer = new FeatureLayer({
+      url: "https://arcgis-ope.codexremote.com.br/server/rest/services/Hosted/Camadas_Teste/FeatureServer/2",
+      title: "Eixos",
+      opacity: 0.7,
+      visible: true,
+    });
 
-    view.on("click", (event: any) => {
-      view.hitTest(event).then((response: any) => {
-        const bairroGraphic = response.results.find(
-          (result: any) =>
-            result.graphic && result.graphic.layer === bairrosLayer
-        )?.graphic;
+    const regioesPlanejamentoLayer = new FeatureLayer({
+      url: "https://arcgis-ope.codexremote.com.br/server/rest/services/Hosted/Camadas_Teste/FeatureServer/3",
+      title: "Regiões de Planejamento",
+      opacity: 1,
+      visible: true,
+    });
 
-        if (bairroGraphic) {
-          setSelectedBairro(bairroGraphic.attributes); // Atualiza o estado no Home
-        } else {
-          setSelectedBairro(null); // Limpa a seleção se nenhum bairro for clicado
-        }
-      });
+    const pontosCotadosLayer = new FeatureLayer({
+      url: "https://arcgis-ope.codexremote.com.br/server/rest/services/Hosted/Camadas_Teste/FeatureServer/1",
+      title: "Pontos Cotados",
+      opacity: 0.5,
+      visible: true,
     });
 
     webMap.addMany([
@@ -115,25 +83,43 @@ export const MapComponent: React.FC<MapComponentProps> = ({
       bairrosLayer,
     ]);
 
+    setBairrosLayerRef(bairrosLayer);
+
+    viewRef.current = view;
+    setViewRef(view);
+
+    view.on("click", (event: any) => {
+      view.hitTest(event).then((response: any) => {
+        const bairroGraphic = response.results.find(
+          (result: any) =>
+            result.graphic && result.graphic.layer === bairrosLayer
+        )?.graphic;
+
+        if (bairroGraphic) {
+          setSelectedBairro(bairroGraphic.attributes);
+        } else {
+          setSelectedBairro(null);
+        }
+      });
+    });
+
     const layerList = new LayerList({
       view: view,
     });
 
-    const legend = new Legend({
-      view: view,
-    });
-
     view.ui.add(
-      [
-        new Expand({
-          content: layerList,
-          view: view,
-          group: "top-left",
-        }),
-      ],
+      new Expand({
+        content: layerList,
+        view: view,
+        group: "top-left",
+      }),
+
       "top-left"
     );
 
+    const legend = new Legend({
+      view: view,
+    });
     view.ui.add(legend, "bottom-left");
 
     return () => {
